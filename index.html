@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intercambio Gaseoso y Fisiología Respiratoria en Aviación</title>
+  
+  <!-- FontAwesome e Inter Font -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-main: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --accent-o2: #0284c7;
+      --accent-co2: #9333ea;
+      --accent-art: #dc2626;
+      --accent-ven: #4f46e5;
+      --border: #e2e8f0;
+      --radius: 16px;
+      --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 0.4rem 1rem;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    /* Navegación por Pestañas */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      background: #f1f5f9;
+      padding: 0.35rem;
+      border-radius: 12px;
+      max-width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    /* Contenido de Pestañas */
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Tarjetas y Layout */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    /* Canvas de Simulación */
+    .simulation-grid {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .simulation-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .canvas-container {
+      position: relative;
+      background: #f8fafc;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    canvas {
+      width: 100%;
+      height: 380px;
+      display: block;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      background: #f8fafc;
+      padding: 1.25rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .control-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+    }
+
+    /* Indicadores de Sangre */
+    .blood-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      background: #ffffff;
+      padding: 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .metric-item {
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .metric-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    /* Tablas Limpias */
+    .clean-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .clean-table th, .clean-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .clean-table th {
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Ejercicio de Respiración Guiada */
+    .breathing-box {
+      text-align: center;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .breath-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      border: 4px solid var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 1.5rem 0;
+      transition: transform 4s ease-in-out;
+    }
+
+    .breath-circle.expand {
+      transform: scale(1.4);
+      background: #e0f2fe;
+    }
+
+    .breath-circle.hold {
+      transform: scale(1.4);
+      border-color: #0284c7;
+    }
+
+    .breath-circle.contract {
+      transform: scale(1);
+      background: var(--primary-light);
+    }
+
+    /* Módulo de Alveolo LEYENDA */
+    .legend {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <header>
+      <div class="badge"><i class="fa-solid fa-plane"></i> Medicina Aeronáutica & Fisiología</div>
+      <h1>Intercambio Gaseoso y Dinámica Pulmonar</h1>
+      <p class="subtitle">Simulación interactiva de difusión alveolo-capilar y su impacto crítico en la aviación.</p>
+    </header>
+
+    <!-- Pestañas de Navegación -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('simulacion')">
+        <i class="fa-solid fa-microscope"></i> Simulador Realista
+      </button>
+      <button class="tab-btn" onclick="switchTab('composicion')">
+        <i class="fa-solid fa-chart-pie"></i> Composición del Aire
+      </button>
+      <button class="tab-btn" onclick="switchTab('dinamica')">
+        <i class="fa-solid fa-lungs"></i> Dinámica Pulmonar
+      </button>
+      <button class="tab-btn" onclick="switchTab('aviacion')">
+        <i class="fa-solid fa-user-astronaut"></i> Fisiología de Vuelo
+      </button>
+    </div>
+
+    <!-- PESTAÑA 1: SIMULADOR REALISTA -->
+    <div id="simulacion" class="tab-content active">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fa-solid fa-circle-nodes" style="color: var(--primary);"></i>
+            Microcirculación Alveolar en Tiempo Real
+          </div>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Modelo de Difusión Cruzada PO₂ / PCO₂</span>
+        </div>
+
+        <div class="simulation-grid">
+          <div>
+            <div class="canvas-container">
+              <canvas id="diffCanvas"></canvas>
+            </div>
+            <div class="legend">
+              <div class="legend-item"><div class="dot" style="background: #0284c7;"></div> Moléculas de O₂ (Ingresan)</div>
+              <div class="legend-item"><div class="dot" style="background: #9333ea;"></div> Moléculas de CO₂ (Salen)</div>
+              <div class="legend-item"><div class="dot" style="background: #4f46e5;"></div> Sangre Venosa (40 mmHg O₂)</div>
+              <div class="legend-item"><div class="dot" style="background: #dc2626;"></div> Sangre Arterial (104 mmHg O₂)</div>
+            </div>
+          </div>
+
+          <div class="controls-panel">
+            <div class="control-group">
+              <label>Altitud de Vuelo <span id="altVal">0 ft</span></label>
+              <input type="range" id="altRange" min="0" max="30000" step="1000" value="0">
+            </div>
+
+            <div class="control-group">
+              <label>Frecuencia Respiratoria <span id="freqVal">12 rpm</span></label>
+              <input type="range" id="freqRange" min="8" max="24" step="1" value="12">
+            </div>
+
+            <div class="blood-metrics">
+              <div class="metric-item">
+                <div class="metric-label">PO₂ Alveolar</div>
+                <div class="metric-value" id="po2AlvDisplay" style="color: var(--accent-o2);">104 mmHg</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">PCO₂ Alveolar</div>
+                <div class="metric-value" id="pco2AlvDisplay" style="color: var(--accent-co2);">40 mmHg</div>
+              </div>
+            </div>
+
+            <div class="blood-metrics">
+              <div class="metric-item">
+                <div class="metric-label">Saturación SpO₂</div>
+                <div class="metric-value" id="spo2Display" style="color: var(--accent-art);">98%</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Estado Físico</div>
+                <div class="metric-value" id="statusDisplay" style="font-size: 0.85rem; color: #16a34a;">Normoxia</div>
+              </div>
+            </div>
+
+            <button class="btn" id="togglePlayBtn"><i class="fa-solid fa-pause"></i> Pausar Simulación</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PESTAÑA 2: COMPOSICIÓN DEL AIRE -->
+    <div id="composicion" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fa-solid fa-wind" style="color: var(--primary);"></i>
+            Presiones Parciales del Aire en el Cuerpos Humano (Nivel del Mar)
+          </div>
+        </div>
+        <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.95rem;">
+          A medida que el aire ingresa a las vías aéreas, se humidifica y se mezcla con el aire residual pulmonar, alterando las concentraciones y presiones parciales de sus componentes (Ley de Dalton).
+        </p>
+
+        <table class="clean-table">
+          <thead>
+            <tr>
+              <th>Gas</th>
+              <th>Aire Atmosférico (Inspirado)</th>
+              <th>Aire Humidificado (Tráquea)</th>
+              <th>Aire Alveolar (Pulmón)</th>
+              <th>Aire Espirado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>N₂ (Nitrógeno)</strong></td>
+              <td>597.0 mmHg (78.6%)</td>
+              <td>563.4 mmHg (74.1%)</td>
+              <td>569.0 mmHg (74.9%)</td>
+              <td>566.0 mmHg (74.5%)</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--accent-o2);">O₂ (Oxígeno)</strong></td>
+              <td><strong>159.0 mmHg (20.9%)</strong></td>
+              <td>149.3 mmHg (19.6%)</td>
+              <td><strong>104.0 mmHg (13.6%)</strong></td>
+              <td>120.0 mmHg (15.7%)</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--accent-co2);">CO₂ (Dióxido de Carbono)</strong></td>
+              <td>0.3 mmHg (0.04%)</td>
+              <td>0.3 mmHg (0.04%)</td>
+              <td><strong>40.0 mmHg (5.3%)</strong></td>
+              <td>27.0 mmHg (3.6%)</td>
+            </tr>
+            <tr>
+              <td><strong>H₂O (Vapor de Agua)</strong></td>
+              <td>3.7 mmHg (0.5%)</td>
+              <td>47.0 mmHg (6.2%)</td>
+              <td>47.0 mmHg (6.2%)</td>
+              <td>47.0 mmHg (6.2%)</td>
+            </tr>
+            <tr>
+              <td><strong>TOTAL</strong></td>
+              <td><strong>760.0 mmHg</strong></td>
+              <td><strong>760.0 mmHg</strong></td>
+              <td><strong>760.0 mmHg</strong></td>
+              <td><strong>760.0 mmHg</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PESTAÑA 3: DINÁMICA PULMONAR -->
+    <div id="dinamica" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title" style="margin-bottom: 1rem;">
+            <i class="fa-solid fa-arrow-down-long" style="color: var(--primary);"></i>
+            Inspiración (Proceso Activo)
+          </div>
+          <ul style="padding-left: 1.2rem; color: var(--text-muted); font-size: 0.95rem; display: flex; flex-direction: column; gap: 0.6rem;">
+            <li>El <strong>diafragma se contrae</strong> y desciende hacia la cavidad abdominal.</li>
+            <li>Los músculos intercostales externos elevan las costillas.</li>
+            <li>El volumen del tórax <strong>aumenta</strong>.</li>
+            <li>La presión intrapulmonar cae a <strong>-1 mmHg</strong> respecto a la atmosférica, lo que hace que el aire entre espontáneamente.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom: 1rem;">
+            <i class="fa-solid fa-arrow-up-long" style="color: var(--accent-art);"></i>
+            Espiración (Proceso Pasivo)
+          </div>
+          <ul style="padding-left: 1.2rem; color: var(--text-muted); font-size: 0.95rem; display: flex; flex-direction: column; gap: 0.6rem;">
+            <li>El diafragma y los músculos intercostales <strong>se relajan</strong>.</li>
+            <li>La elasticidad natural de los pulmones recorta el volumen de la cavidad torácica.</li>
+            <li>El volumen del tórax <strong>disminuye</strong>.</li>
+            <li>La presión intrapulmonar sube a <strong>+1 mmHg</strong>, expulsando el aire cargado de CO₂ hacia el exterior.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- PESTAÑA 4: FISIOLOGÍA EN AVIACIÓN -->
+    <div id="aviacion" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title" style="margin-bottom: 1rem; color: var(--accent-art);">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            La Hipoxia Hipóxica en Cabina
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem;">
+            Al ascender en altitud, la concentración de oxígeno se mantiene constante en 21%, pero la <strong>presión barométrica disminuye</strong>. Esto reduce drásticamente el gradiente de presión que empuja el $O_2$ a través de la membrana alveolar hacia la sangre.
+          </p>
+          
+          <table class="clean-table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>Altitud (Pies)</th>
+                <th>Tiempo Útil de Conciencia (TUC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>18,000 ft</td>
+                <td>20 a 30 minutos</td>
+              </tr>
+              <tr>
+                <td>25,000 ft</td>
+                <td>3 a 5 minutos</td>
+              </tr>
+              <tr>
+                <td>35,000 ft</td>
+                <td>30 a 60 segundos</td>
+              </tr>
+              <tr>
+                <td>40,000 ft</td>
+                <td>15 a 20 segundos</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom: 0.5rem; color: var(--primary);">
+            <i class="fa-solid fa-heart-pulse"></i>
+            Entrenamiento de Respiración (Box Breathing)
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;">
+            Técnica utilizada por pilotos de combate para prevenir la hiperventilación y regular el estrés en situaciones extremas.
+          </p>
+
+          <div class="breathing-box">
+            <div id="breathCircle" class="breath-circle">Inhala</div>
+            <div id="breathInstruction" style="font-weight: 600; color: var(--text-main);">Preparado...</div>
+            <button class="btn" style="margin-top: 1rem;" onclick="toggleBreathingExercise(this)">Iniciar Ejercicio</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- NAVEGACIÓN ENTRE PESTAÑAS ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      event.currentTarget.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // --- MOTOR DE SIMULACIÓN EN CANVAS ---
+    const canvas = document.getElementById('diffCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = 380;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Estado del Simulador
+    let isRunning = true;
+    let altitude = 0; // ft
+    let respRate = 12; // rpm
+    let time = 0;
+
+    // Elementos de Control
+    const altRange = document.getElementById('altRange');
+    const altVal = document.getElementById('altVal');
+    const freqRange = document.getElementById('freqRange');
+    const freqVal = document.getElementById('freqVal');
+    const toggleBtn = document.getElementById('togglePlayBtn');
+
+    altRange.addEventListener('input', (e) => {
+      altitude = parseInt(e.target.value);
+      altVal.textContent = altitude.toLocaleString() + ' ft';
+      updateMetrics();
+    });
+
+    freqRange.addEventListener('input', (e) => {
+      respRate = parseInt(e.target.value);
+      freqVal.textContent = respRate + ' rpm';
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      isRunning = !isRunning;
+      toggleBtn.innerHTML = isRunning 
+        ? '<i class="fa-solid fa-pause"></i> Pausar Simulación' 
+        : '<i class="fa-solid fa-play"></i> Reanudar Simulación';
+    });
+
+    // Cálculos Fisiológicos
+    function updateMetrics() {
+      // Pérdida de presión con la altitud (Aproximación atmosférica)
+      const po2Alv = Math.max(10, Math.round(104 * Math.exp(-altitude / 20000)));
+      const pco2Alv = 40;
+      let spo2 = Math.min(99, Math.round((po2Alv / 104) * 98));
+      
+      document.getElementById('po2AlvDisplay').textContent = po2Alv + ' mmHg';
+      document.getElementById('pco2AlvDisplay').textContent = pco2Alv + ' mmHg';
+      document.getElementById('spo2Display').textContent = spo2 + '%';
+
+      const statusElem = document.getElementById('statusDisplay');
+      if (spo2 > 93) {
+        statusElem.textContent = 'Normoxia';
+        statusElem.style.color = '#16a34a';
+      } else if (spo2 > 80) {
+        statusElem.textContent = 'Hipoxia Leve';
+        statusElem.style.color = '#eab308';
+      } else if (spo2 > 65) {
+        statusElem.textContent = 'Hipoxia Moderada';
+        statusElem.style.color = '#f97316';
+      } else {
+        statusElem.textContent = 'Hipoxia Severa';
+        statusElem.style.color = '#dc2626';
+      }
+    }
+
+    // Partículas (Moléculas)
+    const o2Particles = [];
+    const co2Particles = [];
+    const rbcList = []; // Glóbulos rojos
+
+    for (let i = 0; i < 25; i++) {
+      o2Particles.push({
+        x: Math.random() * (canvas.width || 600),
+        y: 80 + Math.random() * 80,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: Math.random() * 1 + 0.5
+      });
+    }
+
+    for (let i = 0; i < 8; i++) {
+      rbcList.push({
+        x: (i / 8) * (canvas.width || 600),
+        progress: i / 8
+      });
+    }
+
+    // Renderizado Continuo
+    function draw() {
+      if (isRunning) time += 0.02;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const w = canvas.width;
+      const h = canvas.height;
+
+      // 1. Dibujar Alveolo (Estructura superior)
+      const alvRadius = 110 + Math.sin(time * (respRate / 10)) * 6;
+      ctx.beginPath();
+      ctx.arc(w / 2, 100, alvRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#f0f9ff';
+      ctx.fill();
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '12px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText('ESPACIO ALVEOLAR', w / 2, 70);
+
+      // 2. Dibujar Capilar Sanguíneo (Estructura inferior)
+      const capTop = 240;
+      const capBottom = 320;
+
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fillRect(0, capTop, w, capBottom - capTop);
+
+      ctx.beginPath();
+      ctx.moveTo(0, capTop);
+      ctx.lineTo(w, capTop);
+      ctx.moveTo(0, capBottom);
+      ctx.lineTo(w, capBottom);
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // 3. Mover y Dibujar Eritrocitos (Glóbulos Rojos)
+      rbcList.forEach(rbc => {
+        if (isRunning) {
+          rbc.x += 1.2;
+          if (rbc.x > w + 30) rbc.x = -30;
+        }
+
+        const pct = Math.min(1, Math.max(0, rbc.x / w));
+        
+        // Cambio de color de Venoso (Azul/Púrpura) a Arterial (Rojo Bright)
+        const r = Math.round(79 + (220 - 79) * pct);
+        const g = Math.round(70 + (38 - 70) * pct);
+        const b = Math.round(229 + (38 - 229) * pct);
+
+        ctx.beginPath();
+        ctx.ellipse(rbc.x, capTop + 40, 22, 14, 0, 0, Math.PI * 2);
+        ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+
+      // 4. Moléculas de O2
+      o2Particles.forEach(p => {
+        if (isRunning) {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.y > capTop + 20) {
+            p.y = 80 + Math.random() * 40;
+            p.x = Math.random() * w;
+          }
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#0284c7';
+        ctx.fill();
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    // --- EJERCICIO DE RESPIRACIÓN GUIADA (BOX BREATHING) ---
+    let breathInterval = null;
+    let breathStep = 0;
+
+    function toggleBreathingExercise(btn) {
+      const circle = document.getElementById('breathCircle');
+      const text = document.getElementById('breathInstruction');
+
+      if (breathInterval) {
+        clearInterval(breathInterval);
+        breathInterval = null;
+        btn.textContent = 'Iniciar Ejercicio';
+        circle.className = 'breath-circle';
+        circle.textContent = 'Inhala';
+        text.textContent = 'Preparado...';
+        return;
+      }
+
+      btn.textContent = 'Detener Ejercicio';
+      runBreathingCycle();
+      breathInterval = setInterval(runBreathingCycle, 4000);
+    }
+
+    function runBreathingCycle() {
+      const circle = document.getElementById('breathCircle');
+      const text = document.getElementById('breathInstruction');
+      
+      const steps = [
+        { label: 'Inhala', class: 'expand', desc: 'Inhala profundamente por la nariz (4s)' },
+        { label: 'Mantén', class: 'hold', desc: 'Sostén el aire en los pulmones (4s)' },
+        { label: 'Exhala', class: 'contract', desc: 'Exhala suavemente por la boca (4s)' },
+        { label: 'Espera', class: 'contract', desc: 'Mantén los pulmones vacíos (4s)' }
+      ];
+
+      const current = steps[breathStep];
+      circle.textContent = current.label;
+      circle.className = 'breath-circle ' + current.class;
+      text.textContent = current.desc;
+
+      breathStep = (breathStep + 1) % steps.length;
+    }
+  </script>
+</body>
+</html>
